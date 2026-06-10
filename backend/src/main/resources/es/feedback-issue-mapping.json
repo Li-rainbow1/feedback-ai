@@ -1,0 +1,22 @@
+{
+  "properties": {
+    "issueId": { "type": "keyword" },
+    "title": {
+      "type": "text",
+      "fields": {
+        "keyword": { "type": "keyword", "ignore_above": 256 }
+      }
+    },
+    "category": { "type": "keyword" },
+    "severity": { "type": "keyword" },
+    "productId": { "type": "long" },
+    "createdAt": { "type": "date" },
+    "reportCount": { "type": "integer" },
+    "embedding": {
+      "type": "dense_vector",
+      "dims": 1024,
+      "index": true,
+      "similarity": "cosine"
+    }
+  }
+}

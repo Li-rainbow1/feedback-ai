@@ -1,0 +1,123 @@
+server:
+  port: 8088
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+jwt:
+  secret: ${JWT_SECRET:change-me-feedback-analyzer-jwt-secret-32-bytes}
+  expiration: ${JWT_EXPIRATION:86400000}
+
+spring:
+  application:
+    name: feedback-analyzer
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3308/feedback_analyzer?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:feedback_demo_password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+
+  elasticsearch:
+    uris: ${SPRING_ELASTICSEARCH_URIS:http://localhost:9200}
+    username: ${SPRING_ELASTICSEARCH_USERNAME:elastic}
+    password: ${SPRING_ELASTICSEARCH_PASSWORD:feedback_demo_password}
+
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      retries: 3
+      acks: all
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.feedback.analyzer.*"
+      group-id: ${SPRING_KAFKA_CONSUMER_GROUP_ID:feedback-analyzer-group}
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+    listener:
+      ack-mode: manual
+    topics:
+      feedback-raw: ${SPRING_KAFKA_TOPIC_FEEDBACK_RAW:feedback.raw}
+
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+    default-property-inclusion: non_null
+
+  ai:
+    openai:
+      api-key: ${SPRING_AI_OPENAI_API_KEY:}
+      base-url: ${SPRING_AI_OPENAI_BASE_URL:https://api.deepseek.com}
+      chat:
+        options:
+          model: ${SPRING_AI_OPENAI_CHAT_MODEL:deepseek-chat}
+          temperature: 0.1
+
+redisson:
+  address: ${REDISSON_ADDRESS:redis://localhost:16379}
+  password: ${REDISSON_PASSWORD:}
+  database: ${REDISSON_DATABASE:0}
+  timeout: 3000
+  connection-pool-size: 32
+  connection-minimum-idle-size: 8
+
+dedup:
+  similarity-threshold: ${DEDUP_SIMILARITY_THRESHOLD:0.80}
+  module-mismatch-block-enabled: ${DEDUP_MODULE_MISMATCH_BLOCK_ENABLED:false}
+
+feedback:
+  processing:
+    raw-stuck-hours: ${FEEDBACK_RAW_STUCK_HOURS:2}
+    analyzing-timeout-minutes: ${FEEDBACK_ANALYZING_TIMEOUT_MINUTES:60}
+
+public-review:
+  collect-timeout-minutes: ${PUBLIC_REVIEW_COLLECT_TIMEOUT_MINUTES:30}
+  processing-hard-timeout-hours: ${PUBLIC_REVIEW_PROCESSING_HARD_TIMEOUT_HOURS:6}
+
+ai:
+  rate-limit:
+    llm:
+      rate: ${AI_RATE_LIMIT_LLM_RATE:5}
+    embedding:
+      rate: ${AI_RATE_LIMIT_EMBEDDING_RATE:10}
+
+embedding:
+  api-url: ${EMBEDDING_API_URL:https://dashscope.aliyuncs.com/api/v1/services/embeddings/text-embedding/text-embedding}
+  api-key: ${EMBEDDING_API_KEY:}
+  model: ${EMBEDDING_MODEL:text-embedding-v4}
+
+notification:
+  feishu:
+    webhook-url: ${FEISHU_WEBHOOK_URL:}
+
+zentao:
+  enabled: ${ZENTAO_ENABLED:false}
+  url: ${ZENTAO_URL:}
+  account: ${ZENTAO_ACCOUNT:admin}
+  password: ${ZENTAO_PASSWORD:}
+  default-opened-build: ${ZENTAO_DEFAULT_OPENED_BUILD:trunk}
+  entry-code: ${ZENTAO_ENTRY_CODE:}
+  entry-token: ${ZENTAO_ENTRY_TOKEN:}
+  webhook-token: ${ZENTAO_WEBHOOK_TOKEN:}
+  connect-timeout-ms: ${ZENTAO_CONNECT_TIMEOUT_MS:3000}
+  read-timeout-ms: ${ZENTAO_READ_TIMEOUT_MS:8000}
+
+logging:
+  level:
+    com.feedback.analyzer: DEBUG
+    org.springframework.kafka: INFO
